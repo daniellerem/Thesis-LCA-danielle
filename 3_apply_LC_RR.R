@@ -31,10 +31,10 @@ for(i in 1:nboot){
   
   # now solve label switching issue
   ## first get the order of the classes of Y1 (assume consistence over indicators)
-  order = c(which.max(LCAS[[i]]$probs$Y1[1,]),
-            which.max(LCAS[[i]]$probs$Y1[2,]),
-            which.max(LCAS[[i]]$probs$Y1[3,]),
-            which.max(LCAS[[i]]$probs$Y1[4,]))
+  order = c(which.max(LCAS[[i]]$probs$Y1[,1]),
+            which.max(LCAS[[i]]$probs$Y1[,2]),
+            which.max(LCAS[[i]]$probs$Y1[,3]),
+            which.max(LCAS[[i]]$probs$Y1[,4]))
   
   ## store LC output under a new name
   LCAS2[[i]] = LCAS[[i]]

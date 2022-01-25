@@ -23,6 +23,8 @@ for(k in 1:nboot){
       # and multiply it by the probability of the score of Y3 in the row
       # and multiply it by the probability of the score of Y4 in the row
       #P(X=1) * P( Y1=1,Y2=1,Y3=1,Y4=1|X=1)
+      
+      #voor Z1: [j,4] of [j,5]? 
       implist[[k]][j,i+6] = prod(LCAS2[[1]]$P[i],
                                  LCAS2[[1]]$probs$Y1[i,as.numeric(paste(df1[j,1]))],
                                  LCAS2[[1]]$probs$Y2[i,as.numeric(paste(df1[j,2]))],

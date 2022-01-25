@@ -1,12 +1,12 @@
 #-------------------------------2. BOOTSTRAP DATA-----------#
-load("simulated_dataset_RR.RData") #we now have SimData
-dfboot = list(NA) #empty list to store bootstrapped datasets in
+load("simulated_dataset_RR.RData") 
+dfboot = list(NA) 
 
-for (sim in 1:nsim) { #iteration over number of simulations
+for (sim in 1:nsim) {
   
-  df1 <- SimData[[sim]] #assign dataframe of one iteration to "df1"
-  # aggregate data and store each dataset in the list "dffreq"
-  dffreq <- df1[,1:4] %>%  #select columns with variables
+  df1 <- SimData[[sim]] 
+  # aggregate data 
+  dffreq <- df1[,1:4] %>%  
     count(Y1, Y2, Y3, Y4) 
 
 #create nboot bootstrap samples

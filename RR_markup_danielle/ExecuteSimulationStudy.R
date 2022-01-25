@@ -1,5 +1,6 @@
 #Simulation Study
 getwd()
+setwd("C:/Users/danie/OneDrive/Statistiek master/Thesis/Thesis-LCA-danielle/Thesis-LCA-danielle/RR_markup_danielle")
 library(tictoc)
 start_time = Sys.time() #time, start counting
 tic("simulation")
@@ -9,7 +10,7 @@ library(dplyr) #for data manipulation
 library(confreq) #used for making bootstrap datasets 
 
 #simulation parameters
-nsim = 3 #increase to higher number of simulations when you have the time (nsim = 3 runt in 1.5 minuten)
+nsim = 5 #increase to higher number of simulations when you have the time (nsim = 3 runt in 1.5 minuten)
 nboot = 5 #FIXED, nboot determines the number of imputations per simulation iteration. 5 is sufficient.
 populationsize = 5000 #for the data simulation
 
@@ -17,6 +18,8 @@ populationsize = 5000 #for the data simulation
     #1) om parameters aan te passen moet die parameter niet in een script gedefinieerd staan
     #2) aangezien (bootstrap) data later weer nodig is, en het losse scripts zijn, heb ik deze een aantal keer bovenaan een script moeten zetten (bvb: "LCASIM = LCASIM") omdat hij anders niet in de .RData file kwam te staan
     #3) in de simulatie werkt het label switching niet meer. Ik ben nog op zoek naar wat er nodig is om het wel te laten werken.
+    #4) set.seed(123), waar neerzetten? binnen for loop over nsim? of daarvoor? en hoe vaak?
+
 
 #execute respective scripts
 source("1_SimulateData.R")    #Simulate the data

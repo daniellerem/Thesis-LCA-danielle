@@ -37,10 +37,10 @@ mod2 <- poLCA.simdata(N       = 5000,
                       missval = F)
 
 # simulated dataset measurement part
-df2 <- cbind(mod2$dat[,1:ncol(mod2$dat)]+1,
+df2 <- cbind(mod2$dat[,1:ncol(mod2$dat)]+1, 
              sectors = mod2$trueclass+1) 
 
-
+prop.table(table(df2$sectors))
 # combine selection error and measurement error in one set
 for(i in 1:ncol(df1)){
   to_replace = which(df1[,i] == 2)
