@@ -13,7 +13,7 @@ library(confreq) #used for making bootstrap datasets
 library(dplyr) #for data manipulation
 
 #simulation parameters
-nsim = 2
+nsim = 20
 populationsize = 5000
 nboot = 5
 
@@ -26,13 +26,13 @@ ImpSim = list(NA)
 SimProp.classes = list(NA)
 SimBias = list(NA)
 
+set.seed(123) #niet binnen de nsim loop! dan krijg je steeds dezelfde resultaten...
 for (sim in 1:nsim) { #iteration over number of simulations
   
 #-------------------------------1. DATA SIMULATION-----------#
 
 #Variant A (5% selection error and 5% measurement error)
 options(scipen = 999)
-set.seed(123)
 
 #5% selection error + strong covar
 select_5 <-  list(matrix(c(0.95, 0.05, 0.05, 0.95), ncol=2, byrow=T),
@@ -190,8 +190,7 @@ ImpSim[[sim]] <- implist
 slice_sample(implist[[2]], n=5) #sample 5 random rows from the results. 
 #NOTE: trueclass is from original data. the imputations are from the bootstrap samples
 #      we are interested in the total class proportions, so not in individual true & imputed classes
-end_time = Sys.time()
-end_time-start_time #elapsed time for script
+
 
 #-------------------------------5. Results-----------#
 imp = list(NA)
@@ -227,6 +226,9 @@ implist = ImpSim[[sim]]
   Average-trueclass
   
 } #end loop over simulations
+end_time = Sys.time()
+end_time-start_time #elapsed time for script
+
 
 bias #bias between group sizes of original data and the imputations of the bootstrap data
 #pool bias
