@@ -13,14 +13,19 @@ library(confreq) #used for making bootstrap datasets
 library(dplyr) #for data manipulation
 
 #simulation parameters
-nsim = 3
+nsim = 2
 populationsize = 5000
 nboot = 5
 
-##create storage room
+#start timer
+start_time = Sys.time() 
 
-
+##create storage room for simulated results (otherwise within loop it writes itself empty again)
 SimData = list(NA) #empty list to store simulated data in
+ImpSim = list(NA)
+SimProp.classes = list(NA)
+SimBias = list(NA)
+
 for (sim in 1:nsim) { #iteration over number of simulations
   
 #-------------------------------1. DATA SIMULATION-----------#
@@ -107,9 +112,13 @@ for (m in 1:5) {
   cat(m)
   bootdata[[m]] <- as.data.frame(confreq::fre2dat(dfboot[,c(1:5, (m+6))])) #converge frequency table to dataframe
   colnames(bootdata[[m]]) = c("Y1","Y2","Y3","Y4","Z1") # call covar Z1
-  #run LC model on each bootstrap sample
-  LCAS[[m]] = poLCA(formula = cbind(Y1, Y2, Y3, Y4, Z1) ~ 1,  
-                    bootdata[[m]],       nclass = 4,      nrep = 10)
+
+    #run LC model on each bootstrap sample
+  log <- capture.output({ #make sure not all messages are displayed
+    LCAS[[m]] = ((poLCA(formula = cbind(Y1, Y2, Y3, Y4, Z1) ~ 1,  
+                        bootdata[[m]],       nclass = 4,      nrep = 10)))   
+  })
+
   LCAS_probs[[m]] <-   LCAS[[m]]$P #display proportions per class, for each bootstrap sample
   #conclusion: we have a label switching problem
   #Solution: 
@@ -174,61 +183,54 @@ for(m in 1:nboot){ #for each bootstrap sample
   for (i in 1:ssize) {
     implist[[m]][i,"imp"] = which(rmultinom(1, 1, implist[[m]][i,c("p1","p2","p3","p4")]) == 1)
     implist[[m]][i,"imp2"] = sample(x=c(1:4), replace=T,size=1, prob = implist[[m]][i,c("p1","p2","p3","p4")])
-  }
-}#end loop over bootstraps
+  } #end loop over rows
+  } #end loop over bootstraps
+ImpSim[[sim]] <- implist
+
 slice_sample(implist[[2]], n=5) #sample 5 random rows from the results. 
 #NOTE: trueclass is from original data. the imputations are from the bootstrap samples
 #      we are interested in the total class proportions, so not in individual true & imputed classes
-
+end_time = Sys.time()
+end_time-start_time #elapsed time for script
 
 #-------------------------------5. Results-----------#
 imp = list(NA)
 imp2 = list(NA)
 bias = list(NA)
 method = list(NA)
+prop.classes = list(NA)
+
 
 #A. Overall group sizes
 trueclass <- prop.table(table(df1$trueclass)) #proportions original data
 
 ## i. bias
-for(m in 1:5){ #bias 
-  imp[[m]] <- prop.table(table(implist[[m]]$imp))
-  imp2[[m]] <- prop.table(table(implist[[m]]$imp2))
-  bias[[m]] <- trueclass-imp[[m]]
-  method[[m]] <- imp[[m]]-imp2[[m]]
-}
+implist = ImpSim[[sim]]
+
+  #Overall group sizes
+  #calculate bias between group sizes of original data and the imputations of the bootstrap data
+  for(m in 1:5){ #bias 
+      imp[[m]] <- prop.table(table(implist[[m]]$imp))
+      imp2[[m]] <- prop.table(table(implist[[m]]$imp2))
+      bias[[m]] <- trueclass-imp[[m]]
+      method[[m]] <- imp[[m]]-imp2[[m]]
+    }
+
+  #First pool within simulation the 5 imputations
+  Pooled.prop.classes <- rowMeans(sapply(imp, unlist))
+  Pooled.prop.classes-trueclass
+  Pooled.bias <- rowMeans(sapply(bias, unlist))
+  
+  #pooled mean group sizes per simulation iteration
+  SimProp.classes[[sim]] <- Pooled.prop.classes 
+  Average <- rowMeans(sapply(SimProp.classes, unlist))
+  Average-trueclass
+  
+} #end loop over simulations
+
 bias #bias between group sizes of original data and the imputations of the bootstrap data
 #pool bias
 method #to see whether there is a difference between the two methods to impute the classes in step 4 (conclusion: there is no big difference)
-## ii. SE
-st.er <- function(x) sd(x)/sqrt(length(x))
-st.er()
-#average standard error/Standard deviation over all replications  
+ #end loop over nsim
 
-## iii. coverage CI (prop times population value falls within 95% CI around estimate over all replications)
-CI <-  confint(trueclass) #werkt alleen op lm objects
-FunConfInt <- function(x){
-  interv <- function(x) 1.96*sd(x)/sqrt(length(x))
-  lower <- mean(x)-interv(x)
-  upper <- mean(x)+interv(x) 
-  Confid <- cbind(lower, upper)
-  return(Confid)
-}
-Capture <-  ifelse((CI[1]>0|CI[2]<0), 0, 1)
-
-
-}#end loop over nsim
-## iv. ME
-
-
-#accuracy = Correct classifications/Total cases
-
-#create confusion matrix? we are interested in population totals, not in classifications right?
-
-#B. Relationship with covariate
-
-
-#pool$lower   <- pool$qbar - qt(.975, pool$df) * sqrt(pool$t)
-#pool$upper   <- pool$qbar + qt(.975, pool$df) * sqrt(pool$t)
-#pool$coverage <- pool$lower <= mean(truth1) & mean(truth1) <= pool$upper
-
+SimProp.classes

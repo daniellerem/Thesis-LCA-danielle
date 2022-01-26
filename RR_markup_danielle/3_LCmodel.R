@@ -15,14 +15,19 @@ LCAS_probs <- list(NA)
 LCAS2_probs <- list(NA)
 
 
+
 for (sim in 1:2) { 
 set.seed(123)
 for (i in 1:5) {
   #create dataset per bootstrap sample with the following code:
   bootdata[[i]] <- as.data.frame(confreq::fre2dat(dfboot[[sim]][,c(1:4, (i+5))])) #converge frequency table to dataframe
+  
   #run LC model on each bootstrap sample
-  LCAS[[i]] = poLCA(formula = cbind(Y1, Y2, Y3, Y4) ~ 1,  
-                    bootdata[[i]],       nclass = 4,      nrep = 10)
+   log <- capture.output({ #make sure not all messages are displayed
+   LCAS[[i]] = ((poLCA(formula = cbind(Y1, Y2, Y3, Y4) ~ 1,  
+                    bootdata[[i]],       nclass = 4,      nrep = 10)))   
+   })
+
 #display proportions per class, for each bootstrap sample 
  LCAS_probs[[i]] <-   LCAS[[i]]$P 
 #conclusion: we have a label switching problem
