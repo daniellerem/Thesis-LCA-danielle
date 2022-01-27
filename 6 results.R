@@ -43,4 +43,26 @@ FunConfInt <- function(x){
   return(Confid)
 }
 
+Capture <-  ifelse((CI[1]>0|CI[2]<0), 0, 1)
+
+
+
+## ii. SE
+st.er <- function(x) sd(x)/sqrt(length(x))
+#average standard error/Standard deviation over all replications  
+
+## iv. ME
+
+
+#accuracy = Correct classifications/Total cases
+
+#create confusion matrix? we are interested in population totals, not in classifications right?
+
+#B. Relationship with covariate
+
+
+#pool$lower   <- pool$qbar - qt(.975, pool$df) * sqrt(pool$t)
+#pool$upper   <- pool$qbar + qt(.975, pool$df) * sqrt(pool$t)
+#pool$coverage <- pool$lower <= mean(truth1) & mean(truth1) <= pool$upper
+
 

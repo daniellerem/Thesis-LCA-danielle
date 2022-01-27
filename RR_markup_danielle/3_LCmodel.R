@@ -16,8 +16,7 @@ LCAS2_probs <- list(NA)
 
 
 
-for (sim in 1:2) { 
-set.seed(123)
+for (sim in 1:nsim) { 
 for (i in 1:5) {
   #create dataset per bootstrap sample with the following code:
   bootdata[[i]] <- as.data.frame(confreq::fre2dat(dfboot[[sim]][,c(1:4, (i+5))])) #converge frequency table to dataframe
