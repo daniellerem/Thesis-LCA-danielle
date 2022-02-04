@@ -6,6 +6,7 @@
 #load necessary packages
 library(poLCA) #for LC model 
 library(dplyr) #for data manipulation
+library(confreq) #used for making bootstrap datasets
 
 #simulation parameters
 nsim = 20 #specify if different than in "ExecuteSimStudy....R"-script
@@ -18,6 +19,16 @@ ImpVariants = list(NA)
 dfSim = list(NA)
 dfVariants = list(NA)
 
+#store results
+bootdata <- list(NA)
+LCAS <- list(NA)
+LCAS2 <- list(NA)
+
+#to test if labels are correct
+LCAS_probs <- list(NA)
+LCAS2_probs <- list(NA)
+LCAS3 = list(NA)
+
 #miscallaneous
 options(scipen = 999)
 start_time = Sys.time() 
@@ -25,31 +36,19 @@ start_time = Sys.time()
 load("SimData.RData")
 
 set.seed(123) #niet binnen de nsim loop! dan krijg je steeds dezelfde resultaten...
-
 for (variant in 1:8) {
-  cat(variant) #display variant 
+  #cat(variant) #display variant 
   Simboots = SimVariants[[variant]]
-  
+  cat(variant)
 for (sim in 1:nsim) { #iteration over number of simulations
   dfboot <- Simboots[[sim]]
   # LCA STEP + LABEL CHECK (and switch if necessary)-----------#
-  
-  #store results
-  bootdata <- list(NA)
-  LCAS <- list(NA)
-  LCAS2 <- list(NA)
-  
-  #to test if labels are correct
-  LCAS_probs <- list(NA)
-  LCAS2_probs <- list(NA)
-  LCAS3 = list(NA)
-  set.seed(123)
+  cat(sim)
   
   #poLCA.reorder()
   #poLCA.posterior()
   for (m in 1:5) {
-    cat(m)
-    bootdata[[m]] <- as.data.frame(confreq::fre2dat(dfboot[,c(1:5, (m+6))])) #converge frequency table to dataframe
+    bootdata[[m]] <- as.data.frame(confreq::fre2dat(dfboot[,c(1:6, (m+7))]))[,-6] #converge frequency table to dataframe
     colnames(bootdata[[m]]) = c("Y1","Y2","Y3","Y4","Z1") # call covar Z1
         #run LC model on each bootstrap sample
     log <- capture.output({ #make sure not all messages are displayed
@@ -112,31 +111,29 @@ for (sim in 1:nsim) { #iteration over number of simulations
   }#end function
   
   #retrieve original data
-  df1 <- as.data.frame(confreq::fre2dat(dfboot[,c(1:6)])) #converge frequency table to original dataframe
-  df1[,c("p1","p2","p3","p4","imp", "imp2")] <- NA    # create empty columns to store calculated posteriors
+  df1 <- as.data.frame(confreq::fre2dat(dfboot[,c(1:7)])) #converge frequency table to original dataframe
+  df1[,c("p1","p2","p3","p4","imp")] <- NA    # create empty columns to store calculated posteriors
   
   #Results
   implist = list(NA) #store results
   for(m in 1:nboot){ #for each bootstrap sample
     implist[[m]] <- df1
-    implist[[m]][,(6:9)] <-  posterior_function(dataset = bootdata[[m]], conditionals = LCAS2[[m]]$probs, Pclasses = LCAS2_probs[[m]])
+    implist[[m]][,(7:10)] <-  posterior_function(dataset = bootdata[[m]], conditionals = LCAS2[[m]]$probs, Pclasses = LCAS2_probs[[m]])
     for (i in 1:ssize) {
-      implist[[m]][i,"imp"] = which(rmultinom(1, 1, implist[[m]][i,c("p1","p2","p3","p4")]) == 1)
-      implist[[m]][i,"imp2"] = sample(x=c(1:4), replace=T,size=1, prob = implist[[m]][i,c("p1","p2","p3","p4")])
+      implist[[m]][i,"imp"] = which(rmultinom(1, 1, prob=implist[[m]][i,c("p1","p2","p3","p4")]) == 1)
+  #    implist[[m]][i,"imp2"] = sample(x=c(1:4), replace=T,size=1, prob = implist[[m]][i,c("p1","p2","p3","p4")])
         } #end loop over rows
    } #end loop over bootstraps
   
   
   #store results
   ImpSim[[sim]] <- implist
-  dfSim[[sim]] <- df1
-  
+
 } #end loop over nsim
-  dfVariants[[variant]] <- dfSim
   ImpVariants[[variant]] <- ImpSim
 } #end loop over variants
 end_time = Sys.time()
 end_time-start_time #elapsed time for script
 
 save(ImpVariants, file="ImpSim.RData")
-head(ImpVariants[[7]][[19]][[1]])
+head(ImpVariants[[5]][[2]][[1]])

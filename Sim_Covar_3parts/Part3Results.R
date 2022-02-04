@@ -45,13 +45,11 @@ load("TrueData.RData") #class proportions of $trueclass of simulated data
 names(ImpVariants)=c('A5w5s','A5s5w','B5w20s','B5s20w','C20w5s','C20s5w','D20w20s','D20s20w')
 nsim=20
 
-for (variant in 1:8) { #normally 8 (in this RData only 5 variants loaded)
+for (variant in 1:8) { 
   ImpSim <- ImpVariants[[variant]] 
-  TrueSim <- trueVariants[[variant]]
 for (sim in 1:nsim) {
   implist <-  ImpSim[[sim]]
-  trueprops <- TrueSim[[sim]]
-  
+
 #A. Overall group sizes ########
 original_classsizes = c(0.15, 0.34, 0.2975, 0.2125)
 
@@ -63,7 +61,6 @@ for(m in 1:5){ #bias
 #Pooled proportions and bias ##########
 Pooled.prop.classes <- rowMeans(sapply(imp, unlist))                         #class Proportions 
 Pooled.bias <- abs(original_classsizes-Pooled.prop.classes)                  #pooled absolute bias
-  Pooled.bias/Pooled.prop.classes   #% correct geclassificeerd???
 
 #functions ########
 fun.sd.p <- function(prop) sqrt((prop*(1-prop))/5000) #standard deviation
@@ -114,7 +111,7 @@ Sim_var <- apply(X=sapply(SimProp.classes, unlist), MARGIN =1, FUN = var) #varia
 # B. Relationship w/ covariate ########
 
 ##covs
-truecovariate <- prop.table(table(implist[[1]]$Y5)) #proportions original data
+#truecovariate <- prop.table(table(implist[[1]]$Y5)) #proportions original data ??? zijn die er wel?
 
 #covariate distr per class
 cov.df <- prop.table(table(covariate=implist[[1]]$Y5, imputed_class=implist[[1]]$imp), margin = 2) 
@@ -122,13 +119,10 @@ prop.cov.class[[sim]] <- cov.df
 
 # C. Relationship w/ true variable ########
 
-#in part1 we only store the frequencies of the score patterns 
-#of the original dataset (y1-y5) and the bootstraps
-#we lose the full simulated dataframe with the trueclass 
-#I stored the trueclass proportions in TrueData.RData
+trueclass <- prop.table(table(implist[[1]]$trueclass)) #proportions original data ??? zijn die er wel?
 
 #proportions and bias
-Pooled.bias_trueclass[[sim]] <- abs(trueprops-Pooled.prop.classes)            #pooled absolute bias
+Pooled.bias_trueclass[[sim]] <- abs(trueclass-Pooled.prop.classes)            #pooled absolute bias
 
 
 

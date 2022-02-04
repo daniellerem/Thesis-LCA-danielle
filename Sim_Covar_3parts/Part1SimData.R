@@ -17,17 +17,13 @@ library(dplyr) #for data manipulation
 
 
 #simulation parameters
-nsim = 100 #specify if different than in "ExecuteSimStudy....R"-script
+nsim = 20 #specify if different than in "ExecuteSimStudy....R"-script
 populationsize = 5000
 nboot = 5
 
 #create storage room for simulated results 
 Simboots = list(NA)
 SimVariants = list(NA)
-covar_props = c()
-covar_sim = c()
-true_sim=list(NA)
-trueVariants=list(NA)
 
 #miscallaneous
 options(scipen = 999)
@@ -78,8 +74,8 @@ for (sim in 1:nsim) { #iteration over number of simulations
   #1) 0.15 2) 0.34 3) 0.2975 4) 0.2125
   original_classsizes = c(0.15, 0.34, 0.2975, 0.2125)
   #calculate frequencies of each score pattern
-  dffreq <- df1[,1:ncol(df1)-1] %>% 
-    count(Y1, Y2, Y3, Y4, Y5)
+  dffreq <- df1[,1:ncol(df1)] %>% 
+    count(Y1, Y2, Y3, Y4, Y5, trueclass)
   
 
   #-------------------------------2. BOOTSTRAP DATA-----------#
@@ -95,19 +91,13 @@ for (sim in 1:nsim) { #iteration over number of simulations
   dfboot= cbind(dffreq, boots)
   Simboots[[sim]] <- dfboot
   
-covar_sim[[sim]] <-  prop.table(table(df1$Y5))
-true_sim[[sim]] <- prop.table(table(df1$trueclass))
 
 
 } #end loop over nsim
   
-  covar_props[[variant]] <- covar_sim
 SimVariants[[variant]] <-  Simboots
-trueVariants[[variant]] <- true_sim
 
 } #end loop over variants
 save(SimVariants, file = "SimData.RData")
-save(trueVariants, file = "TrueData.RData")
 
-dfVariants[[2]][[58]]  
 
