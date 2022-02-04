@@ -41,7 +41,6 @@ var.m  = list(NA)
 #load data ##########
 original_classsizes = c(0.15, 0.34, 0.2975, 0.2125)
 load('ImpSim.RData') #simulated datasets with imputations
-load("TrueData.RData") #class proportions of $trueclass of simulated data
 names(ImpVariants)=c('A5w5s','A5s5w','B5w20s','B5s20w','C20w5s','C20s5w','D20w20s','D20s20w')
 nsim=20
 
