@@ -59,14 +59,14 @@ meas_20s <- list(matrix(c(0.8,0.1,0.1,    0.1,0.8,0.1,     0.1,0.1,0.8 ), ncol=3
 measurement_errors= list(meas_5w, meas_5s, meas_20w, meas_20s) 
 
 ##variants
-varA1 = list(select_5w, meas_5s)
-varA2 = list(select_5s, meas_5w)
-varB1 = list(select_5w, meas_20s)
-varB2 = list(select_5s, meas_20w)
-varC1 = list(select_20w, meas_5s)
-varC2 = list(select_20s, meas_5w)
-varD1 = list(select_20w, meas_20s)
-varD2 = list(select_20s, meas_20w)
-variants = list(varA1,varA2,varB1,varB2,varC1,varC2,varD1,varD2)
+A5w5s = list(select_5w, meas_5s) 
+A5s5w = list(select_5s, meas_5w)
+B5w20s = list(select_5w, meas_20s)
+B5s20w = list(select_5s, meas_20w)
+C20w5s = list(select_20w, meas_5s)
+C20s5w = list(select_20s, meas_5w)
+D20w20s = list(select_20w, meas_20s)
+D20s20w = list(select_20s, meas_20w)
+variants = list(A5w5s,A5s5w,B5w20s,B5s20w,C20w5s,C20s5w,D20w20s,D20s20w)
 
 save(variants, file = "VarErrors.RData")

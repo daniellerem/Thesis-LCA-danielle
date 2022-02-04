@@ -1,62 +1,150 @@
 
 
-##########################################
+#........................................#
 #        #Part 3: Results                #
-##########################################
+#........................................#
+
+#I am now using apply statements. alternative is dplyr pipes.
 
 
-
+#create empty lists  ##########################################
 resultsvariants=list(NA)
-resultsvariants2=list(NA)
+resultsvariants_average=list(NA)
+resultsvariants_bias = list(NA)
+resultsvariants_sd = list(NA)
+resultsvariants_prop.cov.classes = list(NA)
+resultsvariants_simvar =list(NA)
+resultsvariants_trueclassbias=list(NA)
+resultsvariants_capture95CI=list(NA)
+Pooled.bias_trueclass=list(NA)
 SimProp.classes= list(NA)
+SimPooledBias = list(NA)
+resultsvariants_pooledbias=list(NA)
+Pooled.bias = list(NA)
+SimVariances = list(NA)
+Capture=list(NA)
 imp = list(NA)
-imp2 = list(NA)
 bias = list(NA)
-method = list(NA)
+st.dev = list(NA)
 prop.classes = list(NA)
+prop.cov.class = list(NA)
+between.var  = list(NA)
+var.m  = list(NA)
 
+#SimVariants[[8]][[99]] #dataset voor de 8e conditie en de 99e simulatie iteratie
+#ImpVariants[[8]][[3]][[5]] #for 8condities, 100 simulations, and 5 imputations
 
-load('ImpSim.RData')
-ImpVariants[[8]][[5]][[5]] #for 8variants, 5 simulations, and 5 imputations
-for (variant in 1:8) {
+#........................................#
+#        Start summary of results        ####
+#........................................#
+
+#load data ##########
+original_classsizes = c(0.15, 0.34, 0.2975, 0.2125)
+load('ImpSim.RData') #simulated datasets with imputations
+load("TrueData.RData") #class proportions of $trueclass of simulated data
+names(ImpVariants)=c('A5w5s','A5s5w','B5w20s','B5s20w','C20w5s','C20s5w','D20w20s','D20s20w')
+nsim=20
+
+for (variant in 1:8) { #normally 8 (in this RData only 5 variants loaded)
   ImpSim <- ImpVariants[[variant]] 
+  TrueSim <- trueVariants[[variant]]
 for (sim in 1:nsim) {
-#A. Overall group sizes
-trueclass <- prop.table(table(df1$trueclass)) #proportions original data
+  implist <-  ImpSim[[sim]]
+  trueprops <- TrueSim[[sim]]
+  
+#A. Overall group sizes ########
+original_classsizes = c(0.15, 0.34, 0.2975, 0.2125)
 
-## i. bias
-implist = ImpSim[[sim]]
-
-#Overall group sizes
-#calculate bias between group sizes of original data and the imputations of the bootstrap data
+#proportions per class
 for(m in 1:5){ #bias 
   imp[[m]] <- prop.table(table(implist[[m]]$imp))
-  imp2[[m]] <- prop.table(table(implist[[m]]$imp2))
-  bias[[m]] <- trueclass-imp[[m]]
-  method[[m]] <- imp[[m]]-imp2[[m]]
+  }
+
+#Pooled proportions and bias ##########
+Pooled.prop.classes <- rowMeans(sapply(imp, unlist))                         #class Proportions 
+Pooled.bias <- abs(original_classsizes-Pooled.prop.classes)                  #pooled absolute bias
+  Pooled.bias/Pooled.prop.classes   #% correct geclassificeerd???
+
+#functions ########
+fun.sd.p <- function(prop) sqrt((prop*(1-prop))/5000) #standard deviation
+fun.var.p <- function(prop) (prop*(1-prop))/5000      #variance
+fun.var.p(0.5) #maximum variance value (var= 0.00005) is determined by sample size (n=5000)
+FunConfInt <- function(prop){
+  interv <- function(prop) 1.96*sqrt((prop*(1-prop))/5000)
+  lower <- prop-interv(prop)
+  upper <- prop+interv(prop) 
+  Confid <- cbind(lower, prop, upper)
+  return(Confid)
 }
 
-#First pool within simulation the 5 imputations
-Pooled.prop.classes <- rowMeans(sapply(imp, unlist))
-Pooled.prop.classes-trueclass
-Pooled.bias <- rowMeans(sapply(bias, unlist))
+#Standard Deviation (SD)
+original.sd <- fun.sd.p(original_classsizes)
+st.dev[[sim]] <- colMeans(apply(sapply(imp, unlist), MARGIN = 1, FUN = fun.sd.p))
+
+#Variances ######## 
+for(m in 1:5){ #variances 
+  var.m[[m]] <- fun.var.p(imp[[m]]) #variance
+  between.var[[m]] <- (imp[[m]]-Pooled.prop.classes)^2              #var between   (parameter uncertainty caused by bootstrapping)
+    }
+                        
+pooled.var.within <- rowMeans(sapply(var.m, unlist))                 #pooled within variance 
+pooled.var.between <-   apply(X=sapply(between.var, unlist), MARGIN= 1,FUN = function(x) sum(x)/4)    #pooled between variance 
+SimVariances[[sim]] <- pooled.var.between+pooled.var.within
+
+# Coverage CI #####
+#nr of times 95% CI of a simulation covers the original class proportions
+FunConfInt(original_classsizes)
+CI95 <- FunConfInt(Pooled.prop.classes)
+CI95[,1]
+Capture[[sim]] <-  ifelse((original_classsizes<CI95[,1]|original_classsizes>CI95[,3]), 0, 1)
+#Capture2 <-  ifelse((original_classsizes>CI95[,1]&original_classsizes<CI95[,3]), 1, 0)
+
 
 #pooled mean group sizes per simulation iteration
 SimProp.classes[[sim]] <- Pooled.prop.classes 
-Average <- rowMeans(sapply(SimProp.classes, unlist))
-Average-trueclass
+SimPooledBias[[sim]] <- Pooled.bias
+
+#Simulation summary 
+Average <- rowMeans(sapply(SimProp.classes, unlist))  #(averages of simulation results)
+SimBias = original_classsizes-Average
+Sim_var <- apply(X=sapply(SimProp.classes, unlist), MARGIN =1, FUN = var) #variation over simulations
+
+
+
+# B. Relationship w/ covariate ########
+
+##covs
+truecovariate <- prop.table(table(implist[[1]]$Y5)) #proportions original data
+
+#covariate distr per class
+cov.df <- prop.table(table(covariate=implist[[1]]$Y5, imputed_class=implist[[1]]$imp), margin = 2) 
+prop.cov.class[[sim]] <- cov.df
+
+# C. Relationship w/ true variable ########
+
+#in part1 we only store the frequencies of the score patterns 
+#of the original dataset (y1-y5) and the bootstraps
+#we lose the full simulated dataframe with the trueclass 
+#I stored the trueclass proportions in TrueData.RData
+
+#proportions and bias
+Pooled.bias_trueclass[[sim]] <- abs(trueprops-Pooled.prop.classes)            #pooled absolute bias
+
+
 
 } #end loop over simulations
-  resultsvariants[[variant]] <- SimProp.classes
-  resultsvariants2[[variant]] <- Average #per variant
   
+  #Results per variant ####
+  resultsvariants_average[[variant]] <- Average 
+  resultsvariants_bias[[variant]] <- SimBias 
+  resultsvariants_pooledbias[[variant]] <- rowMeans(sapply(SimPooledBias, unlist))
+  resultsvariants_sd[[variant]] <- rowMeans(sapply(st.dev, unlist))
+  resultsvariants_simvar[[variant]] <- Sim_var
+  resultsvariants_capture95CI[[variant]] <- apply(X=sapply(Capture, unlist), MARGIN =1 ,FUN = sum)/nsim
+  #covariances
+  resultsvariants_prop.cov.classes[[variant]] <- prop.cov.class
+  #bias from trueclass per simulation
+  resultsvariants_trueclassbias[[variant]] <- rowMeans(sapply(Pooled.bias_trueclass, unlist))
 } #end loop over variants
-end_time = Sys.time()
-end_time-start_time #elapsed time for script
 
-bias #bias between group sizes of original data and the imputations of the bootstrap data
-#pool bias
-method #to see whether there is a difference between the two methods to impute the classes in step 4 (conclusion: there is no big difference)
-#end loop over nsim
-
-SimProp.classes
+ 

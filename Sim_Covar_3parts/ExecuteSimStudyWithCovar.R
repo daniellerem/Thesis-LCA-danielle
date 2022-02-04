@@ -9,7 +9,7 @@ library(dplyr) #for data manipulation
 library(confreq) #used for making bootstrap datasets 
 
 #simulation parameters
-nsim = 3 #increase to higher number of simulations when you have the time (nsim = 10 runt in 7.7 minuten)
+nsim = 5 #increase to higher number of simulations when you have the time (nsim = 10 runt in 7.7 minuten)
 nboot = 5 #FIXED, nboot determines the number of imputations per simulation iteration. 5 is sufficient.
 populationsize = 5000 #for the data simulation
 
@@ -17,7 +17,9 @@ set.seed(123)
 #execute respective scripts
 
 source("Part1SimData.R")    #Simulate the data
+
 source("Part2applyMILC.R")   #Apply MILC
+
 source("Part3Results")       #Calculate results
 
 
