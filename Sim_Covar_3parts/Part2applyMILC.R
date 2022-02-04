@@ -136,4 +136,4 @@ end_time = Sys.time()
 end_time-start_time #elapsed time for script
 
 save(ImpVariants, file="ImpSim.RData")
-head(ImpVariants[[5]][[2]][[1]])
+head(ImpVariants[[8]][[2]][[1]])
