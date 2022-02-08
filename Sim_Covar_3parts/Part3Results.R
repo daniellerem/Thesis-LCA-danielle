@@ -85,7 +85,7 @@ for(m in 1:5){ #variances
                         
 pooled.var.within <- rowMeans(sapply(var.m, unlist))                 #pooled within variance 
 pooled.var.between <-   apply(X=sapply(between.var, unlist), MARGIN= 1,FUN = function(x) sum(x)/4)    #pooled between variance 
-SimVariances[[sim]] <- pooled.var.between+pooled.var.within
+SimVariances[[sim]] <- pooled.var.within+(1+1/5)*pooled.var.between
 
 # Coverage CI #####
 #nr of times 95% CI of a simulation covers the original class proportions
