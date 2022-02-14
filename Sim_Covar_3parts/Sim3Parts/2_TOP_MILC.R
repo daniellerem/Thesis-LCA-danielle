@@ -16,6 +16,7 @@ source("2a_LCmodel.R")
                                                       
 impdats <- rep(list(rep(list(vector("list", nboot)),nsim)), nconds)
 
+init=Sys.time()
 
 for(i in 1:nconds){                                                             # loop over conditions
   cat(i)
@@ -32,6 +33,9 @@ for(i in 1:nconds){                                                             
       }
     }
   }
+  save(impdats, file = "impdat.RData")
+  
 }
-save(impdats, file = "impdat.RData")
 
+SimulationTotalTime = Sys.time()-init
+SimulationTotalTime
