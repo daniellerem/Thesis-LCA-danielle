@@ -6,7 +6,6 @@
 
 #I am now using apply statements. alternative is dplyr pipes.
 
-
 #create empty lists  ##########################################
 resultsvariants=list(NA)
 resultsvariants_average=list(NA)
@@ -62,11 +61,11 @@ Pooled.prop.classes <- rowMeans(sapply(imp, unlist))                         #cl
 Pooled.bias <- abs(original_classsizes-Pooled.prop.classes)                  #pooled absolute bias
 
 #functions ########
-fun.sd.p <- function(prop) sqrt((prop*(1-prop))/5000) #standard deviation
-fun.var.p <- function(prop) (prop*(1-prop))/5000      #variance
+fun.sd.p <- function(prop) sqrt((prop*(1-prop))) #standard deviation
+fun.var.p <- function(prop) (prop*(1-prop))      #variance
 fun.var.p(0.5) #maximum variance value (var= 0.00005) is determined by sample size (n=5000)
 FunConfInt <- function(prop){
-  interv <- function(prop) 1.96*sqrt((prop*(1-prop))/5000)
+  interv <- function(prop) 1.96*sqrt((prop*(1-prop)))
   lower <- prop-interv(prop)
   upper <- prop+interv(prop) 
   Confid <- cbind(lower, prop, upper)
@@ -140,4 +139,4 @@ Pooled.bias_trueclass[[sim]] <- abs(trueclass-Pooled.prop.classes)            #p
   resultsvariants_trueclassbias[[variant]] <- rowMeans(sapply(Pooled.bias_trueclass, unlist))
 } #end loop over variants
 
- 
+ -0.4463-1.96*sqrt(0.17+0.09)
