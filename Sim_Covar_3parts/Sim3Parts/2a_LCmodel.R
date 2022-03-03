@@ -24,13 +24,14 @@ posteriors = function(bootdat,
                 nclass = 4,
                 probs.start=probs.start.new)
   })
+  entr <- poLCA.entropy(LCAr)
   
   ordat = as.data.frame(fre2dat(bootdat[,c(1:7)]))
   
   posdat = cbind(ordat, 
                  poLCA.posterior(lc = LCAr, 
-                                 y = ordat[,-6]))                                #exclude 'trueclass' column from posterior calculation
-  
+                                 y = ordat[,-6]), entr)                         #exclude 'trueclass' column from posterior calculation
+                                                                                
   return(posdat)
   
 }

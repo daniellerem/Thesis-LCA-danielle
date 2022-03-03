@@ -61,8 +61,8 @@ Pooled.prop.classes <- rowMeans(sapply(imp, unlist))                         #cl
 Pooled.bias <- abs(original_classsizes-Pooled.prop.classes)                  #pooled absolute bias
 
 #functions ########
-fun.sd.p <- function(prop) sqrt((prop*(1-prop))) #standard deviation
-fun.var.p <- function(prop) (prop*(1-prop))      #variance
+fun.sd.p <- function(prop) sqrt((prop*(1-prop))/nsize) #standard deviation
+fun.var.p <- function(prop) (prop*(1-prop)/nsize)      #variance
 fun.var.p(0.5) #maximum variance value (var= 0.00005) is determined by sample size (n=5000)
 FunConfInt <- function(prop){
   interv <- function(prop) 1.96*sqrt((prop*(1-prop)))
