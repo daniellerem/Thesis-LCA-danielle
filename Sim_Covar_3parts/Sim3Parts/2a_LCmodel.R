@@ -25,6 +25,7 @@ posteriors = function(bootdat,
                 probs.start=probs.start.new)
   })
   entr <- poLCA.entropy(LCAr)
+  p.se <- LCAr$P.se
   
   ordat = as.data.frame(fre2dat(bootdat[,c(1:7)]))
   
