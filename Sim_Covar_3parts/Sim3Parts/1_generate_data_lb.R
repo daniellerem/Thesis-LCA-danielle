@@ -4,7 +4,7 @@ library(dplyr)
 
 options(scipen = 999)
 
-nsim   = 20 
+nsim   = 2
 nsize  = 5000 
 nboot  = 5
 nconds = 8
@@ -35,3 +35,4 @@ for(i in 1:nconds){                                                             
 }
 save(simbootdat, file = "simbootdat.RData")
 
+sim_conds
